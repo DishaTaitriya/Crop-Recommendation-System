@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Based Crop Recommendation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #crop-image {
+            display: none;
+            margin-top: 10px;
+            max-width: 100%;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>AI-Based Crop Recommendation</h2>
+        <form id="cropForm">
+            <input type="number" name="N" placeholder="Nitrogen (N)" required>
+            <input type="number" name="P" placeholder="Phosphorus (P)" required>
+            <input type="number" name="K" placeholder="Potassium (K)" required>
+            <input type="number" name="Temperature" placeholder="Temperature (°C)" required>
+            <input type="number" name="humidity" placeholder="Humidity (%)" required>
+            <input type="number" name="ph" placeholder="pH Level" required>
+            <input type="number" name="Rainfall" placeholder="Rainfall (mm)" required>
+
+            <select name="Soil Type">
+                <option value="Clayey">Clayey</option>
+                <option value="Loamy">Loamy</option>
+                <option value="Sandy">Sandy</option>
+                <option value="Sandy">Sandy loam</option>
+            </select>
+
+            <button type="submit">Get Recommendation</button>
+        </form>
+
+        <div id="result"></div>
+        <img id="crop-image" src="" alt="Crop Image">
+    </div>
+
+    <script>
+        document.getElementById("cropForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            let formData = new FormData(event.target);
+            let jsonData = {};
+            formData.forEach((value, key) => { jsonData[key] = value; });
+
+            fetch("/recommend", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("result").innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                    document.getElementById("crop-image").style.display = "none";
+                } else {
+                    document.getElementById("result").innerHTML = `<h3>Recommended Crop: ${data.recommended_crop}</h3>`;
+                    document.getElementById("crop-image").src = data.image;
+                    document.getElementById("crop-image").style.display = "block";
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
+
+</body>
+</html>
